@@ -1,31 +1,18 @@
-import React, { Component } from 'react';
+import React, {  useEffect } from 'react';
 import axios from 'axios';
 
-class App extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            hello: [],
-        }
-    }
+function App() {
 
-    componentDidMount() {
-        this._getHello();
-    }
+    useEffect(() => {
+        axios.get('/')
+            .then(res => console.log(res))
+    })
 
-    _getHello = async () => {
-        const res = await axios.get('/hello');
-        this.setState({ hello: res.data.hello })
-        console.log(this.state.hello);
-    }
-
-    render() {
-        return (
-            <>
-                <h3>get DB data(ºê¶ó¿ìÀú °³¹ß¸ğµå ÄÜ¼ÖÈ®ÀÎ)</h3>
-            </>
-        )
-    }
+    return (
+        <div className="App">
+           <h1>ì½˜ì†” í™•ì¸</h1> 
+        </div>
+    )
 }
 
 export default App;
