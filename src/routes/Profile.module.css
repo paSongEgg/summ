@@ -1,0 +1,54 @@
+.container {
+  background-color: white;
+  font-weight: 300;
+  padding-top: 56px;
+  border-radius: 5px;
+  text-align: center;
+  color: #adaeb9;
+  display: block;
+  color: inherit;
+  font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
+}
+
+.sectionBox {
+  margin: 8px auto 10px auto;
+  width: 1400px;
+  border: 1px solid #313131;
+  box-sizing: border-box;
+  border-radius: 10px;
+  display: block;
+}
+
+.profileImage {
+  position: relative;
+  border-radius: 18px;
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+}
+
+.item {
+  padding: 12px 16px;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  line-height: 24px;
+  word-wrap: break-word;
+  font-size: 16px;
+  letter-spacing: -0.5px;
+}
+
+.logoutBtn {
+  position: fixed;
+  right: 50px;
+  top: 20px;
+  color: #111111;
+  background-color: #4aa8d8;
+  padding-right: 12px;
+  padding-left: 12px;
+  margin-bottom: 35px;
+  border-radius: 15px;
+  line-height: 30px;
+  font-size: 12px;
+  font-weight: bold;
+}
