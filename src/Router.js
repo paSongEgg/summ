@@ -1,8 +1,8 @@
 import { BrowserRouter,Routes, Route } from "react-router-dom";
-import Home from './routes/Home.js';
-import Auth from './routes/Auth.js';
-import Profile from './routes/Profile.js';
-import Navigation from './components/Navigation.js';
+import Home from 'routes/Home.js';
+import Auth from 'routes/Auth.js';
+import Profile from 'routes/Profile.js';
+import Navigation from 'components/Navigation.js';
 
 const AppRouter = () => {
     return (

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styles from "./Quiz.module.css";
+import styles from "styles/Quiz.module.css";
 import {
   Container,
   Row,

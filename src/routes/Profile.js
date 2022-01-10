@@ -1,12 +1,9 @@
 import React, { Component } from "react";
-import styles from "./Profile.module.css";
+import styles from 'styles/Profile.module.css';
 
 function Profile() {
   return (
     <div className={styles.container}>
-      <a href="/user/logout" class={styles.logoutBtn}>
-        로그아웃
-      </a>
       <section className={styles.sectionBox}>
         <div>
           <h1>내 정보</h1>

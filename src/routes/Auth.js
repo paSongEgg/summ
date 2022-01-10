@@ -41,11 +41,11 @@ const Auth = () => {
                 />
                 <input
                     type="submit"
-                    value={newAccount ? "ฐ่มคปýผบ" : "ทฮฑืภฮ"}
+                    value={newAccount ? "๊ณ์ •์์ฑ" : "๋ก๊ทธ์ธ"}
                 />
             </form>
             <span onClick={loginToCreate}>
-                {newAccount ? "ทฮฑืภฮ" : "ฐ่มคปýผบ"}
+                {newAccount ? "๋ก๊ทธ์ธ" : "๊ณ์ •์์ฑ"}
             </span>
         </div>
     );
