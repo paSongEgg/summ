@@ -1,12 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
-    "\\server",
     "\\server\\config",
     "\\src",
     "\\src\\components",
     "\\src\\routes"
   ],
+  "SelectedNode": "\\src\\components\\Quiz.js",
   "PreviewInSolutionExplorer": false
 }
