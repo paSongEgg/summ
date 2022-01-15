@@ -1,8 +1,8 @@
 router.post('/onLogin', (req, res) => {
     const userID = req.query.userID;
     const userPW = req.query.userPW;
-    const isExist = 'select count(*) as result from test where userID=?';
-    const signUp = 'insert into test (userID,password) values(?,?);';
+    const isExist = 'select count(*) as result from user_table where userID=?';
+    const signUp = 'insert into user_table (userID,password) values(?,?);';
     db.query(isExist, userID, (err, data) => {
         if (!err) {
             if (data[0] > 0) {
