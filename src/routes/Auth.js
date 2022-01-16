@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-const Auth = () => {
+import { Auth } from 'aws-amplify'
+
+const Authorization = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [newAccount, setNewAccout] = useState(true);
@@ -47,7 +49,11 @@ const Auth = () => {
             <span onClick={loginToCreate}>
                 {newAccount ? "로그인" : "계정생성"}
             </span>
+            <button
+            onClick={() => Auth.federatedSignIn({ provider: "Google" })}>
+                <img src="img/btn_google_signin_light_normal_web.png" style={{height:"45px", width:"190px"}}/>
+            </button>
         </div>
     );
 };
-export default Auth;
+export default Authorization;
