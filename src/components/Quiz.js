@@ -30,7 +30,7 @@ function Quiz() {
   }
 
   return (
-    <Container className={styles.nanumGothicFont}>
+    <Container>
       <Row className="d-flex justify-content-center">
         <span className="mt-5 d-flex justify-content-center border">
           <h1>Quiz</h1>
