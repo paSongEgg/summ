@@ -1,5 +1,5 @@
-import React from "react";
-import AppRouter from "Router.js";
+import React from 'react';
+import AppRouter from 'Router.js';
 
 function App() {
   return (
