@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Quiz.module.css";
-import "bootstrap/dist/css/bootstrap.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import {

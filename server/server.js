@@ -12,17 +12,6 @@ app.get("/", (req, res) => {
       else res.send(err);
     });
   });
-
-  app.get("/test", (req, res) => {
-    db.query("SELECT * FROM quizTable", (err, data) => {
-      if (!err) res.send({ products: data });
-      else res.send(err);
-    });
-  });
-
-  app.listen(port, () => {
-    console.log(`Connect at http://localhost:${port}`);
-  });
 });
 
 module.exports = app;
