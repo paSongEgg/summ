@@ -15,35 +15,8 @@ import {
 
 function Quiz() {
   const [showing, setShowing] = useState(false);
-  const [lastquiz, setLastQuiz] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchLastQuiz = async () => {
-    try {
-      setError(null);
-      setLastQuiz([]);
-      setLoading(true);
-
-      const response = await axios.get(`http://localhost:3001/quiz/lastquiz`);
-      setLastQuiz(response.data);
-      console.log("fetch LastQuiz");
-    } catch (e) {
-      setError(e);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchLastQuiz();
-  }, []);
 
   const [key, setKey] = useState("lastQuiz");
-  const [id, setID] = useState("");
-
-  const onChange = (e) => {
-    setLastQuiz(e.target.value);
-  };
 
   let active = 2;
   let items = [];
@@ -55,14 +28,6 @@ function Quiz() {
       </Pagination.Item>
     );
   }
-
-  const [inputData, setInputData] = useState([
-    {
-      id: "",
-      quizTitle: "",
-      userResult: "",
-    },
-  ]);
 
   return (
     <Container className={styles.nanumGothicFont}>

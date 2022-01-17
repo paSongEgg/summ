@@ -1,16 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap");
 
-.container {
-  background-color: white;
-  padding-top: 56px;
-  border-radius: 5px;
-  color: #adaeb9;
-  display: flex;
-  align-items: center;
-  justify-content: center space-around;
-  text-align: center;
-}
-
 .nanumGothicFont {
   font-family: "Nanum Gothic", sans-serif;
 }
