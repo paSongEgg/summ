@@ -15,10 +15,32 @@ import {
 } from "react-bootstrap";
 
 function Quiz() {
+  const [showing, setShowing] = useState(false);
+  const [lastquiz, setLastQuiz] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchLastQuiz = async () => {
+    try {
+      setError(null);
+      setLastQuiz([]);
+      setLoading(true);
+
+      const response = await axios.get(`http://localhost:3001/quiz/lastquiz`);
+      setLastQuiz(response.data);
+      console.log("fetch LastQuiz");
+    } catch (e) {
+      setError(e);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchLastQuiz();
+  }, []);
+
   const [key, setKey] = useState("lastQuiz");
   const [id, setID] = useState("");
-
-  const [lastquiz, setLastQuiz] = useState("lastQuiz");
 
   const onChange = (e) => {
     setLastQuiz(e.target.value);
@@ -35,12 +57,6 @@ function Quiz() {
     );
   }
 
-  useEffect(() => {
-    axios.get("/quiz/test").then((res) => {
-      console.log(res);
-    });
-  }, []);
-
   const [inputData, setInputData] = useState([
     {
       id: "",
@@ -48,21 +64,6 @@ function Quiz() {
       userResult: "",
     },
   ]);
-
-  useEffect(async () => {
-    try {
-      const res = await axios.get("/quiz/test");
-      const _Data = await res.data.map((rowData) => ({
-        id: rowData.id,
-        quizTitle: rowData.quizTitle,
-        userResult: rowData.userResult,
-      }));
-      // 선언된 _inputData 를 최초 선언한 inputData 에 concat 으로 추가
-      setInputData(inputData.concat(_Data));
-    } catch (e) {
-      console.error(e.message);
-    }
-  }, []);
 
   return (
     <Container className={styles.nanumGothicFont}>
@@ -72,9 +73,35 @@ function Quiz() {
         </span>
 
         <Row className="m-5 row-cols-1 d-flex justify-content-center">
-          <Spinner animation="border" role="status" className="m-5"></Spinner>
-          <span className="d-flex justify-content-center">
-            <Button variant="success">퀴즈 생성하기</Button>
+          {showing ? (
+            <Button
+              variant="transparent"
+              className="d-flex justify-content-center"
+            >
+              <Spinner
+                as="span"
+                animation="border"
+                role="status"
+                className="m-5"
+              />
+            </Button>
+          ) : (
+            <div className="mt-5 error row-cols-1 justify-content-center">
+              <h1 className="mt-3 text-center">에러가 발생했습니다.</h1>
+              <span className="mt-3 d-flex justify-content-center">
+                <Button
+                  onClick={fetchLastQuiz}
+                  onClick={() => {
+                    setShowing((showing) => !showing);
+                  }}
+                >
+                  다시 불러오기
+                </Button>
+              </span>
+            </div>
+          )}
+          <span className="m-3 d-flex justify-content-center">
+            {!showing ? null : <Button variant="success">퀴즈 생성하기</Button>}
           </span>
         </Row>
 
