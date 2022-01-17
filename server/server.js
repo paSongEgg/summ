@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const port = 3001;
 const db = require("./config/db");
 
 app.get("/", (req, res) => {
