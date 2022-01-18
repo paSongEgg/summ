@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-const Auth = () => {
+import { Auth } from 'aws-amplify'
+
+const Authorization = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [newAccount, setNewAccout] = useState(true);
@@ -41,13 +43,17 @@ const Auth = () => {
                 />
                 <input
                     type="submit"
-                    value={newAccount ? "°èÁ¤»ı¼º" : "·Î±×ÀÎ"}
+                    value={newAccount ? "ê³„ì •ìƒì„±" : "ë¡œê·¸ì¸"}
                 />
             </form>
             <span onClick={loginToCreate}>
-                {newAccount ? "·Î±×ÀÎ" : "°èÁ¤»ı¼º"}
+                {newAccount ? "ë¡œê·¸ì¸" : "ê³„ì •ìƒì„±"}
             </span>
+            <button
+            onClick={() => Auth.federatedSignIn({ provider: "Google" })}>
+                <img src="img/btn_google_signin_light_normal_web.png" style={{height:"45px", width:"190px"}}/>
+            </button>
         </div>
     );
 };
-export default Auth;
+export default Authorization;

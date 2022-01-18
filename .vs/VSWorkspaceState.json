@@ -1,12 +1,13 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
     "\\server",
     "\\server\\config",
     "\\src",
     "\\src\\components",
-    "\\src\\routes"
+    "\\src\\routes",
+    "\\src\\styles"
   ],
+  "SelectedNode": "\\server\\server.js",
   "PreviewInSolutionExplorer": false
 }

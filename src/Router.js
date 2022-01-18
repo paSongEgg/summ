@@ -1,8 +1,8 @@
 import { BrowserRouter,Routes, Route } from "react-router-dom";
-import Home from './routes/Home.js';
-import Auth from './routes/Auth.js';
-import Profile from './routes/Profile.js';
-import Navigation from './components/Navigation.js';
+import Home from 'routes/Home.js';
+import Authorization from 'routes/Auth.js';
+import Profile from 'routes/Profile.js';
+import Navigation from 'components/Navigation.js';
 
 const AppRouter = () => {
     return (
@@ -10,7 +10,7 @@ const AppRouter = () => {
             <Navigation/>
             <Routes>
                 <Route exact path='/' element={<Home />} />
-                <Route path='/auth' element={<Auth />} />
+                <Route path='/auth' element={<Authorization />} />
                 <Route path='/profile' element={<Profile />} />
             </Routes>
         </BrowserRouter>
