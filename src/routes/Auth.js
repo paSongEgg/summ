@@ -18,6 +18,7 @@ const Auth = () => {
 
     const onSubmit = (event) => {
         event.preventDefault();
+        
     };
     const loginToCreate = () => setNewAccout((prev) => !prev);
     return (
