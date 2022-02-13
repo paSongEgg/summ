@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express();
-const db = require('./config/db');
+const db = require('server/config/db');
 
 router.post('/onLogin', (req, res) => {
     const userID = req.query.userID;
