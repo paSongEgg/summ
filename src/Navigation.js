@@ -2,9 +2,8 @@ import { Link } from "react-router-dom";
 const Navigation = () => {
     return (
         <div>
-            <Link to="/">Home</Link>
-            <Link to="/profile">Profile</Link>
-            <Link to="/auth">Auth</Link>
+            <Link to="/home">Main</Link>
+            <Link to="/slider">slider</Link>
         </div>
     );
 };
