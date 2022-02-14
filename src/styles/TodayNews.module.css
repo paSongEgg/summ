@@ -1,0 +1,16 @@
+.todaynews_container{
+    position: relative;
+    background-color: white;
+    font-weight: 300px;
+    padding-top: 30px;
+    padding-left: 80px;
+    color: #adaeb9;
+    display: block;
+    color: inherit;
+    font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
+
+}
+
+.themed_newslists{
+
+}

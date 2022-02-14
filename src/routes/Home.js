@@ -2,6 +2,8 @@ import SearchBar from "components/SearchBar";
 import Themed from "components/Themed";
 import TodayNews from "components/TodayNews";
 import { useState } from "react";
+import styles from "../styles/Home.module.css"
+
 const Home=()=>{
     const [isToday,setIsToday]=useState(true);
     const onOptionClick=()=>setIsToday((prev)=>!prev);
@@ -12,7 +14,15 @@ const Home=()=>{
             {isToday?(
                 <TodayNews/>
             ):(
+                <div className={styles.theme}>
+                    <button className={styles.button_theme}>정치</button>
+                    <button className={styles.button_theme}>경제</button>
+                    <button className={styles.button_theme}>사회</button>
+                    <button className={styles.button_theme}>생활/문화</button>
+                    <button className={styles.button_theme}>IT/과학</button>
+                    <button className={styles.button_theme}>세계</button>
                 <Themed/>
+                </div>
             )}
         </section>
     )
