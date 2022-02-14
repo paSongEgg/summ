@@ -7,8 +7,9 @@ const Home=()=>{
     const [isToday,setIsToday]=useState(true);
     const onOptionClick=()=>setIsToday((prev)=>!prev);
     return(
-        <section className={styles.home_container}>
-            <button className={styles.home_button_changeOption} onClick={onOptionClick}>오늘의 뉴스 / 주제별 뉴스</button>
+        <section className="home_container">
+            <div className="home_button_changeOption" onClick={onOptionClick}>click</div>
+            <SearchBar/>
             {isToday?(
                 <TodayNews/>
             ):(
