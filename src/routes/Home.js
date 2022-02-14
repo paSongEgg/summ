@@ -1,6 +1,6 @@
+import { useState } from "react";
 import Themed from "components/Themed";
 import TodayNews from "components/TodayNews";
-import { useState } from "react";
 import styles from "../styles/Home.module.css"
 
 const Home=()=>{
