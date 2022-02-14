@@ -1,11 +1,15 @@
 import { constructor, useState } from "react";
 import News from "components/News";
+import { 
+    Button, 
+    ButtonGroup} from "react-bootstrap";
 
 const Themed=()=>{
     const [themes,setThemes]=useState([]);
     const[newslist,setNewslist]=useState([]);
     const [clicked,setClicked]=useState("");
     //분류 리스트 가져오기
+
     constructor();
     const onThemeClick=()=>{
 
