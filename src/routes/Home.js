@@ -7,9 +7,8 @@ const Home=()=>{
     const [isToday,setIsToday]=useState(true);
     const onOptionClick=()=>setIsToday((prev)=>!prev);
     return(
-        <section className="home_container">
-            <div className="home_button_changeOption" onClick={onOptionClick}>click</div>
-            <SearchBar/>
+        <section className={styles.home_container}>
+            <button className={styles.home_button_changeOption} onClick={onOptionClick}>통합</button>            
             {isToday?(
                 <TodayNews/>
             ):(
@@ -20,7 +19,7 @@ const Home=()=>{
                     <button className={styles.button_theme}>생활/문화</button>
                     <button className={styles.button_theme}>IT/과학</button>
                     <button className={styles.button_theme}>세계</button>
-                <Themed/>
+                    <Themed/>
                 </div>
             )}
         </section>

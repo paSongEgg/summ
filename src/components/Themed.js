@@ -1,4 +1,4 @@
-import { constructor, useState } from "react";
+import { useState } from "react";
 import News from "components/News";
 import { 
     Button, 
@@ -10,7 +10,6 @@ const Themed=()=>{
     const [clicked,setClicked]=useState("");
     //분류 리스트 가져오기
 
-    constructor();
     const onThemeClick=()=>{
 
     }
