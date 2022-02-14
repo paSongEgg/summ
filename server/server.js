@@ -1,18 +1,13 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const db = require('./config/db');
-
-app.get('/', (req, res) => {
-  db.connect(function (err) {
-      db.query("SELECTED * FROM user_table", (err, data) => {
-          if (!err) res.send({ 
-            data: data 
-          });
-          else res.send(err);
-      })
-    });
-  });
-
+const path=require('path');
+const router=require('routes/Router');
+const db = require('server/config/db');
+const PORT=db.PORT||4000;
+app.use(express.static(path.join(__dirname,'..','public/')));
+app.use('/',router);
 module.exports = app;
 
-
+app.listen(PORT,()=>{
+    console.log('Check out the app at http://localhost:${PORT}');
+});
