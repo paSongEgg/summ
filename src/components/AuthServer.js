@@ -6,7 +6,7 @@ router.post('/onLogin', (req, res) => {
     db.query(isExist, userID, (err, data) => {
         if (!err) {
             if (data[0] > 0) {
-                res.send({ 'msg': 'ÀÌ¹Ì Á¸ÀçÇÏ´Â ÀÌ¸ŞÀÏÀÔ´Ï´Ù.' });
+                res.send({ 'msg' : 'ì´ë¯¸ ì¡´ì¬í•˜ëŠ” ì´ë©”ì¼ì…ë‹ˆë‹¤.' });
             }
             else {
                 db.query(signUp, userID, userPW, (err, data) => {
@@ -23,4 +23,4 @@ router.post('/onLogin', (req, res) => {
             res.send(err);
         }
     }
-});
+);});
