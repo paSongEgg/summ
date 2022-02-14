@@ -1,3 +1,4 @@
+import SearchBar from "components/SearchBar";
 import Themed from "components/Themed";
 import TodayNews from "components/TodayNews";
 import { useState } from "react";
@@ -7,6 +8,7 @@ const Home=()=>{
     return(
         <section className="home_container">
             <div className="home_button_changeOption" onClick={onOptionClick}>click</div>
+            <SearchBar/>
             {isToday?(
                 <TodayNews/>
             ):(
