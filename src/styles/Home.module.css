@@ -10,25 +10,25 @@
     font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
 }
 
-.home_button_changeOption{
-    position: absolute;
-    background-color:aliceblue;
-    color:lightslategray;
-    font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
-    left: 11%;
-    border: none;
-	border-radius: 15px;
-    padding: 10px 20px;
-	text-decoration: none;
-    font-weight: 600;
-    transition: 0.25s;
-}
-
 .theme{
     position: absolute;
     font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
-    top: 86px;
+    top: 30px;
     left: 11%;
+}
+
+.home_button_changeOption{
+    background-color:aliceblue;
+    color:lightslategray;
+    font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
+    font-size: smaller;
+    left: 11%;
+    border-color:rgb(141, 156, 172);
+	border-radius: 15px;
+    padding: 8px 16px;
+	text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
 }
 
 .button_theme{
