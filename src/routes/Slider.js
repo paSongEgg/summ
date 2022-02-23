@@ -1,6 +1,5 @@
 import {useState,useEffect} from "react";
 import SliderContent from 'components/SliderContent.js';
-import { Carousel } from "react-bootstrap";
 
 const Slider =()=>{
     const [contents,setContents]=useState([]);
@@ -17,7 +16,8 @@ const Slider =()=>{
         img:"img/4.png",
         title:"뉴스 제목 2",
         tags:["해시태그1", "해시태그2", "해시태그3"]
-      },{
+      },
+      {
         src:"http://www.sookmyung.ac.kr/bbs/sookmyungkr/164/28688/artclView.do?layout=unknown",
         img:"img/5.png",
         title:"뉴스 제목 3",
