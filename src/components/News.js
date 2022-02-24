@@ -1,6 +1,6 @@
 const News=({newsObj})=>{
     const onNewsClick=()=>{
-
+        
     }
 
     return(
