@@ -1,13 +1,29 @@
-import styles from "../styles/SearchBar.module.css"
+import { useState } from "react"
 
 const SearchBar=()=>{
+    const [searchText,setSearchText]=useState("");
+    const [isChanging,setIsChanging]=useState(false);
+    
+    const onSearchChange=(event)=>{
+        setSearchText((target)=>event);
+        if(searchText!=="") setIsChanging(true);
+        else setIsChanging(false);
+    }
+    const searchEvent=(value)=>{
+
+    }
+    
+    const onSearchClick=(event)=>{
+        event.preventDafault();
+        searchEvent(searchText);
+        setSearchText("");
+    }
     return(
-        <div className={styles.search_bar}>
-            <form method="get">
-                <input className={styles.search_box} size="40" type="text" placeholder="Search keyword"/>
-                <input className={styles.search_btn} value="검색" type="submit"/>
-            </form>
-        </div>
+        <div className="search_container">
+            <input className="search_text_input" type="text" value={searchText} onChange={onSearchChange} placeholder="검색어를 입력하세요"/>
+            <div className="search_submit" onClick={onSearchClick}>검색</div>
+            
+        </div> 
     )
 }
 
