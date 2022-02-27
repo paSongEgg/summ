@@ -1,0 +1,23 @@
+.search_bar{
+    margin: 10px;
+}
+
+.search_box{
+    background: #eee;
+    padding:10px;
+    border-radius:5px;
+    border:0 none;
+    width:160px;
+    margin-right: 5px;
+}
+
+.search_btn{
+    background:#94c1df;
+    color:white;
+    font: 'trebuchet ms', trebuchet;
+    font-size:small;
+    padding:9px 18px;
+    border-radius:5px;
+    border:0 none;
+    font-weight:bold;
+}

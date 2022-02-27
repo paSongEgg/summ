@@ -14,21 +14,27 @@
     position: absolute;
     font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
     top: 30px;
-    left: 11%;
+    left: 5%;
 }
 
 .home_button_changeOption{
-    background-color:aliceblue;
-    color:lightslategray;
+    background-color:rgb(255, 240, 173);
+    color:rgb(139, 131, 94);
     font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
     font-size: smaller;
-    left: 11%;
-    border-color:rgb(141, 156, 172);
+    left: 5%;
+    cursor:pointer;
+    border: none;
 	border-radius: 15px;
     padding: 8px 16px;
 	text-decoration: none;
     font-weight: 600;
     transition: 0.25s;
+}
+
+.home_button_changeOption:hover{
+    background-color: rgb(253, 225, 100);
+    color:rgb(139, 131, 94);
 }
 
 .button_theme{
@@ -36,11 +42,17 @@
     color:rgb(98, 124, 150);
     font-family: "맑은 고딕", "돋움", "Apple SD Gothic Neo", sans-serif;
     font-size: smaller;
-    left: 11%;
+    left: 5%;
+    cursor:pointer;
     border: none;
 	border-radius: 15px;
     padding: 8px 16px;
 	text-decoration: none;
     font-weight: 600;
     transition: 0.25s;
+}
+
+.button_theme:hover{
+    background-color: rgb(140, 167, 218);
+    color:whitesmoke;
 }

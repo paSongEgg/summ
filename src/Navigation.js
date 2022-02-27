@@ -1,46 +1,85 @@
-import { Link } from "react-router-dom";
-import { 
-    Container, 
-    Navbar, 
-    Nav, 
-    Form,
-    FormControl,
-    Button} from "react-bootstrap";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState } from "react";
+import styled from "styled-components";
+import SearchBar from "components/SearchBar";
+import { IoIosMenu } from "react-icons/io";
 
-const Navigation = () => {
+function Navigation () {
+    const [menu, setMenu] = useState(false);
     return (
-        <div>
-            <Navbar bg="light" expand="lg">
-              <Container>
-                <Navbar.Brand href="/">
-                    <img
-                      alt=""
-                      src="img/island.svg"
-                      width="30"
-                      height="30"
-                      className="d-inline-block align-top"
-                    />{' '}SUMM
-                </Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                  <Nav className="me-auto">
-                    <Nav.Link href="/">Main</Nav.Link>
-                    <Nav.Link href="/slider">slider</Nav.Link>
-                    <Form className="d-flex">
-                        <FormControl
-                          type="search"
-                          placeholder="Search keyword"
-                          className="me-2"
-                          aria-label="Search"
-                        />
-                        <Button variant="outline-info">Search</Button>
-                    </Form>
-                  </Nav>
-                </Navbar.Collapse>
-              </Container>
-            </Navbar>
-        </div>
+        <Common>
+            <HomeBox>
+                <LogoImg src="img/island.svg"/>
+                <Home href="/">SUMM</Home>
+            </HomeBox>
+
+            <MenuBox menu={menu}>
+                <br></br>
+                <Menu href="/">Main</Menu>
+                <Menu href="/slider">Slider</Menu>
+                <SearchBar></SearchBar>
+            </MenuBox>
+
+            <Menubar href='#' onClick={() => {setMenu(!menu)}}>
+                <IoIosMenu/>
+            </Menubar>
+        </Common>
     );
 };
+
+const Common = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+    @media screen and (max-width: 550px) {
+        flex-direction: column;
+    }
+`
+
+const Home = styled.a`
+    display: flex;
+    align-items:center;
+    font-size: 30px;
+    margin 10px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+`
+const LogoImg = styled.img`
+    width:40px;
+`
+const HomeBox = styled.div`
+    display: flex;
+    align-items:center;
+`
+
+const MenuBox = styled.div`
+    display: flex;
+    align-items:center;
+    @media screen and (max-width: 550px) {
+        flex-direction: column;
+        align-items:flex-end;
+        display: ${({menu}) => {
+           return menu === false ? 'none' : 'flex'
+        }};
+    }
+`
+
+const Menu = styled.a`
+    margin: 10px;
+    text-decoration: none;
+    color: black;
+`
+
+const Menubar = styled.a`
+    display: flex;
+    align-items:center;
+    font-size: 30px;
+    position: absolute;
+    right: 32px;
+    height: 97px;
+    @media screen and (min-width: 550px) {
+        display: none;    
+    }
+`
+
 export default Navigation;
