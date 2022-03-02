@@ -1,98 +1,226 @@
-import requests
-import re
+from selenium import webdriver as wd
 from bs4 import BeautifulSoup
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+import os
+import re
+import requests
+
+import numpy as np
+import pandas as pd
+import urllib
+import time
+from datetime import datetime
+from tqdm import tqdm
+
 from konlpy.tag import Kkma
 from konlpy.tag import Okt
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
-import numpy as np
 
 
-def get_href(soup, option) :
-    result = []
+def set_chrome_driver() :
+    chrome_options = wd.ChromeOptions()
+    driver = wd.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    return driver
 
-    if "날짜" in option : 
-        div = soup.find('div', { 'class' : 'list_body newsflash_body'})
 
-        for dt in div.find_all('dt', {'class' : 'photo'}) :
-            result.append(dt.find('a')['href'])
+# 기사 본문, 키워드 끌어오는 함수 (네이버 뉴스 링크가 있어야만 가능)
+def get_article_contents(nlink_list) :
 
-    elif "키워드" in option :
-        try :
-            ul_list = soup.find('ul', {'class' : 'list_news'})
-            li_list = ul_list.find_all('li', {'id' : re.compile('sp_nws.*')})
-            area_list = [li.find('div', {'class' : 'news_area'}) for li in li_list]
-            info_list = [area.find('div', {'class' : 'news_info'}) for area in area_list]
-            group_list = [info.find('div', {'class' : 'info_group'}) for info in info_list]
-            a_list = []
-            
-            for group in group_list :
-                a = group.find('a', {'class' : 'info'})
-                a2 = a.next_sibling.next_sibling
-                a_list.append(a2)
-
-            for al in a_list :
-                al = al.get('href')
-                result.append(al)
-
-        except AttributeError as e :
-            print("e")
-
-    return result
-
-def get_request_ds(date, section) :
     headers = {
         'referer' : 'https://www.naver.com/',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
         }
 
-    url = "https://news.naver.com/main/list.nhn"
+    content_list = []
+    keyword_list = []
 
-    sections = { "정치" : 100, "경제" : 101, "사회" : 102, "생활문화" : 103, "세계" : 104, "IT과학" : 105}
-    req = requests.get(url, headers = headers, params = { "date" : date, "sid1" : sections[section]})
-    
-    return req
+    for naver_article_link in nlink_list :
+        if naver_article_link == "" :
+            content_list.append("")
+            keyword_list.append("")
+            continue
 
-def get_request_sp(search, period) :
-    
-        headers = {
+        orig_html = requests.get(naver_article_link, headers=headers)
+        html = BeautifulSoup(orig_html.text, "html.parser")
+
+        try :
+            content = html.find('div',{'id' : 'articleBodyContents'}).text
+            content = re.sub('\xa0|\t|\r|\n|', '', content)
+            textrank = TextRank(content)
+            
+            content_list.append(content)
+            keyword_list.append(textrank.keywords())
+
+
+        except Exception as e :
+            try :
+                content = html.find('div',{'id' : 'articeBody'}).text
+                content = re.sub('\xa0|\t|\r|\n|', '', content)
+                textrank = TextRank(content)
+                
+                content_list.append(content)
+                keyword_list.append(textrank.keywords())
+
+            except Exception as e :
+                content = html.find('div', {'id' : 'newsEndContents'}).text
+                content = re.sub('\xa0|\t|\r|\n|', '', content)
+                textrank = TextRank(content)
+
+                content_list.append(content)
+                keyword_list.append(textrank.keywords())
+                
+    return content_list, keyword_list
+
+
+
+def get_article_infos(driver, crawl_date, press_list, title_list, link_list, nlink_list, date_list, more_news_base_url=None, more_news=False) :
+
+    headers = {
         'referer' : 'https://www.naver.com/',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
         }
 
-        pds = { "1" : 7, "2" : 8, "3" : 9, "4" : 10, "5" : 11, "6" : 12}
-
-        url = "https://search.naver.com/search.naver?"
-        req = requests.get(url, headers = headers, params = { "where" : "news", "sm" : "tab_opt", "sort" : "0", "query" : search, "pd" : pds[period]})
-
-        return req
-
-def crawling_news(soup) :
-    dic = {}
-    #제목
-    try : 
-        title = soup.find('div', {'class' : 'article_info'}).find('h3').string
-    except AttributeError :
-        title = soup.find('div', {'class' : 'end_ct_area'}).find('h2').string
-    except Exception as e :
-        print("에러 발생")
-
-    title = re.sub('\t|\r|\n| ', '', title)
+    more_news_url_list = []
     
-    #본문
-    try :
-        content = soup.find('div',{'id' : 'articleBodyContents'}).text
-    except AttributeError :
-        content = soup.find('div',{'id' : 'articeBody'}).text
-    except Exception as e :
-        print("에러 발생")
-        
-    content = re.sub('\xa0|\t|\r|\n|', '', content)
+    while True :
+        html_src = driver.page_source # driver.page_source 크롬 개발자 도구의 Element 탭 내용과 동일
+        soup = BeautifulSoup(html_src, 'lxml')
 
-    return {'title' : title, 'content' : content}
+        
+        # 관련뉴스
+        more_news_infos = soup.select('a.news_more')
+        
+        if more_news :
+            for more_news_info in more_news_infos:
+                more_news_url = f"{more_news_base_url}{more_news_info.get('href')}"
+                more_news_url_list.append(more_news_url)
+                
+        article_infos = soup.select("div.news_area")
+
+        if not article_infos :
+            break
+
+        for article_info in article_infos :
+            # 언론사명
+            press_info = article_info.select_one("div.info_group > a.info.press")
+
+            if press_info is None :
+                press_info = article_info.select_one("div.info_group > span.info.press")
+                
+            press = press_info.text.replace("언론사 선정", "")
+            press_list.append(press)
+
+            # 기사 제목
+            article = article_info.select_one("a.news_tit")           
+            title = article.get('title')
+            title_list.append(title)
+
+            # 기사 링크
+            link = article.get('href')
+            link_list.append(link)
+
+            # 네이버 기사 링크 (없으면 공란 처리)
+            naver_article = article_info.select_one("div.info_group > a:nth-child(3)")
+
+            if not naver_article :
+                naver_article_link = ""
+            else :
+                naver_article_link = naver_article["href"]
+
+            nlink_list.append(naver_article_link)
+            
+            # 날짜
+            date_list.append(crawl_date)
+
+        time.sleep(2.0)
+        next_btn_status = soup.select_one("a.btn_next").get("aria-disabled")
+
+        if next_btn_status == 'true' :
+            break
+
+        time.sleep(1.0)
+        next_page_btn = driver.find_element_by_css_selector("a.btn_next").click()
+
+    return press_list, title_list, link_list, nlink_list, more_news_url_list
+
+
+
+def get_news_infos(keyword, save_path, target_date, ds_de, sort=0, remove_duplicate=False) :
+    crawl_date = f"{target_date[:4]}.{target_date[4:6]}.{target_date[6:]}" # target_date 자르기 ex. 20220301 => 2022.03.01
+    driver = set_chrome_driver()
+
+    encoded_keyword = urllib.parse.quote(keyword)
+    url = f"https://search.naver.com/search.naver?where=news&query={encoded_keyword}&sm=tab_opt&sort={sort}&photo=0&field=0&pd=3&ds={ds_de}&de={ds_de}&docid=&related=0&mynews=0&office_type=0&office_section_code=0&news_office_checked=&nso=so%3Ar%2Cp%3Afrom{target_date}to{target_date}&is_sug_officeid=0"
+    more_news_base_url = "https://search.naver.com/search.naver"
+    
+    driver.get(url)
+
+    press_list, title_list, link_list, nlink_list, content_list, keyword_list, date_list, more_news_url_list = [], [], [], [], [], [], [], []
+
+    press_list, title_list, link_list, nlink_list, more_news_url_list = get_article_infos(driver=driver,
+                                                                                         crawl_date=crawl_date,
+                                                                                         press_list=press_list,
+                                                                                         title_list=title_list,
+                                                                                         link_list=link_list,
+                                                                                         nlink_list=nlink_list,
+                                                                                         date_list=date_list,
+                                                                                         more_news_base_url=more_news_base_url,
+                                                                                         more_news=True)
+
+    content_list, keyword_list = get_article_contents(nlink_list)
+
+    driver.close()
+
+    if len(more_news_url_list) > 0:
+        more_news_url_list = list(set(more_news_url_list))
+        for more_news_url in more_news_url_list:
+            driver = set_chrome_driver()
+            driver.get(more_news_url)
+            
+            press_list, title_list, link_list, nlink_list, more_news_url_list = get_article_infos(driver=driver,
+                                                                                                 crawl_date=crawl_date,
+                                                                                                 press_list=press_list,
+                                                                                                 title_list=title_list,
+                                                                                                 link_list=link_list,
+                                                                                                 nlink_list=nlink_list,
+                                                                                                 date_list=date_list)
+
+            content_list, keyword_list = get_article_contents(nlink_list)
+                      
+            driver.close()
+
+    article_df = pd.DataFrame({"날짜": date_list, "언론사": press_list, "제목": title_list, "링크": link_list, "네이버 기사 링크":nlink_list, "본문":content_list, "키워드":keyword_list})
+    
+                              
+    print(f"크롤링한 뉴스 기사 수 : {len(article_df)}")
+    if remove_duplicate:
+        article_df = article_df.drop_duplicates(['링크'], keep='first')
+        print(f"after remove duplicate -> {len(article_df)}")
+
+    article_df.to_excel(save_path, index=False)
+
+
+
+def crawl_news_data(keyword, year, month, start_day, end_day, save_path):
+    year = int(year)
+    month = int(month)
+    start_day = int(start_day)
+    end_day = int(end_day)
+    
+    for day in tqdm(range(start_day, end_day+1)):
+        date_time_obj = datetime(year=year, month=month, day=day)
+        target_date = date_time_obj.strftime("%Y%m%d") #strftime 날짜/시간을 스트링으로 변환
+        ds_de = date_time_obj.strftime("%Y.%m.%d")
+
+        get_news_infos(keyword=keyword, save_path=f"{save_path}/{keyword}/{target_date}_{keyword}_.xlsx", target_date=target_date, ds_de=ds_de, remove_duplicate=False)
+
 
 
 class SentenceTokenizer(object) :
+
     def __init__(self) :
         #형태소 분석기
         self.kkma = Kkma()
@@ -127,7 +255,9 @@ class SentenceTokenizer(object) :
         return nouns
 
 
+
 class GraphMatrix(object) :
+
     def __init__(self) :
         self.cnt_vec = CountVectorizer() #단어 출현 빈도로 문서 벡터화
     
@@ -139,12 +269,14 @@ class GraphMatrix(object) :
         return np.dot(cnt_vec_mat.T, cnt_vec_mat), {vocab[word] : word for word in vocab}
 
 
+
 class Rank(object):
+
     def get_ranks(self, graph, d=0.85) : #d = damping factor
         A = graph
         matrix_size = A.shape[0]
         for id in range(matrix_size):
-            A[id, id] = 0 ##대각행렬 원소 1을 0으로 치환
+            A[id, id] = 0 #대각선 부분 0으로
             link_sum = np.sum(A[:,id])
             if link_sum != 0:
                 A[:, id] /= link_sum
@@ -159,6 +291,7 @@ class Rank(object):
 
 
 class TextRank(object) :
+
     def __init__(self, text) :
         self.st = SentenceTokenizer()
 
@@ -192,67 +325,19 @@ class TextRank(object) :
         return keywords
 
 
-def main(date, section) :
-    headers = {
-        'referer' : 'https://www.naver.com/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
-        }
-        
-    href_list = []
-    news_content = {}
-    i = 0
-
-    option = input("날짜 검색 or 키워드 검색 : ")
-
-    if "날짜" in option :
-        date = input("날짜 검색 (ex.YYYYMMDD) : ")
-        section = input("검색할 섹션 선택 (정치 / 경제 / 사회 / 생활문화 / 세계 / IT과학) : ")
-        req = get_request_ds(date, section)
-        soup = BeautifulSoup(req.text, "html.parser")
-
-        href_list = get_href(soup, option)
-
-        for href in href_list :
-            if(href is None) :
-                continue
-            href_req = requests.get(href, headers = headers)
-            href_soup = BeautifulSoup(href_req.text, "html.parser")
-            news_content[i] = {'title' : crawling_news(href_soup).get('title'), 'content' : crawling_news(href_soup).get('content')}
-
-        
-    elif "키워드" in option :
-        search = input("검색할 키워드 : ")
-        period= input("최근 몇 시간 동안의 뉴스를 검색하시겠습니까? (1~6) : ")
-
-        req = get_request_sp(search, period)
-        soup = BeautifulSoup(req.text, 'html.parser')
-
-        href_list = get_href(soup, option)
-
-        for href in href_list :
-            if(href is None) :
-                continue
-            href_req = requests.get(href, headers = headers)
-            href_soup = BeautifulSoup(href_req.text, 'html.parser')
-            news_content[i] = {'title' : crawling_news(href_soup).get('title'), 'content' : crawling_news(href_soup).get('content')}
-            
-    print(len(news_content), "개의 기사가 검색됨.")
-    print()
-
-    for idx in range(0, len(href_list)) :
-        print("링크 : ")
-        print(href_list[idx])
-        print()
-        print("제목 : ")
-        print(news_content[idx]['title'])
-        print("본문 : ")
-        print(news_content[idx]['content'])
-        print()
-
-        textrank = TextRank(news_content[idx]['title'] + " " + news_content[idx]['content'])
-        print(" 키워드 : ", textrank.keywords())
-        print("\n\n\n")
-        
-
 if __name__ == "__main__" :
-    main()
+
+    keyword = input("키워드 입력 : ")
+    print("뉴스 검색할 날짜 입력 (YYYYMMDD 형태로)")
+    start_date = input("검색 시작일 : ")
+    end_date = input("검색 종료일 : ")
+    year = start_date[:4]
+    month = start_date[4:6]
+    start_day = start_date[6:]
+    end_day = end_date[6:]
+    save_path = "./crawling_result"
+
+    os.makedirs(f"{save_path}/{keyword}")
+
+    print("크롤링 시작")
+    crawl_news_data(keyword=keyword, year=year, month=month, start_day=start_day, end_day=end_day, save_path=save_path)
