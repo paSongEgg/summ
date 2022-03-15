@@ -26,8 +26,8 @@ def set_chrome_driver() :
     return driver
 
 
-# 기사 본문, 키워드 끌어오는 함수 (네이버 뉴스 링크가 있어야만 가능)
 def get_article_contents(nlink_list) :
+    # 기사 본문, 키워드
 
     headers = {
         'referer' : 'https://www.naver.com/',
@@ -250,10 +250,6 @@ def crawl_news_data(keyword, year, month, start_day, end_day, save_path):
 
 
 
-
-
-
-
 def get_rankingNews(save_path, target_date, ranking_type, remove_duplicate=False) :
     # 언론사별 랭킹뉴스 검색
     #
@@ -333,7 +329,6 @@ def get_rankingNews_infos(crawl_date, ranking_type, date_list, press_list, ranki
             press_list.append(press)
                              
     return press_list, ranking_list, title_list, nlink_list
-
 
 
 class SentenceTokenizer(object) :
