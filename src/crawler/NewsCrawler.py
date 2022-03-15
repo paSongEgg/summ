@@ -43,40 +43,52 @@ def get_article_contents(nlink_list) :
             keyword_list.append("")
             continue
 
-        orig_html = requests.get(naver_article_link, headers=headers)
-        html = BeautifulSoup(orig_html.text, "html.parser")
+        res = requests.get(naver_article_link, headers=headers)
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        try :
-            content = html.find('div',{'id' : 'articleBodyContents'}).text
+        try : 
+            content = soup.find('div',{'id' : 'articleBodyContents'}).text
             content = re.sub('\xa0|\t|\r|\n|', '', content)
             textrank = TextRank(content)
             
             content_list.append(content)
             keyword_list.append(textrank.keywords())
 
-
-        except Exception as e :
-            try :
-                content = html.find('div',{'id' : 'articeBody'}).text
-                content = re.sub('\xa0|\t|\r|\n|', '', content)
-                textrank = TextRank(content)
-                
-                content_list.append(content)
-                keyword_list.append(textrank.keywords())
-
-            except Exception as e :
-                content = html.find('div', {'id' : 'newsEndContents'}).text
+        except Exception :
+            try : 
+                content = soup.find('div', {'id' : 'dic_area'}).text
                 content = re.sub('\xa0|\t|\r|\n|', '', content)
                 textrank = TextRank(content)
 
                 content_list.append(content)
                 keyword_list.append(textrank.keywords())
+
+            except Exception :
+                try :
+                    content = soup.find('div', {'id' : 'newsEndContents'}).text
+                    content = re.sub('\xa0|\t|\r|\n|', '', content)
+                    textrank = TextRank(content)
+
+                    content_list.append(content)
+                    keyword_list.append(textrank.keywords())
+
+                except Exception :
+                    try :
+                        content = soup.find('div',{'id' : 'articeBody'}).text
+                        content = re.sub('\xa0|\t|\r|\n|', '', content)
+                        textrank = TextRank(content)
+                        
+                        content_list.append(content)
+                        keyword_list.append(textrank.keywords())
+
+                    except Exception :
+                        continue
                 
     return content_list, keyword_list
 
 
 
-def get_article_infos(driver, crawl_date, press_list, title_list, link_list, nlink_list, date_list, more_news_base_url=None, more_news=False) :
+def get_keywordNews_infos(driver, crawl_date, press_list, title_list, link_list, nlink_list, date_list, more_news_base_url=None, more_news=False) :
 
     headers = {
         'referer' : 'https://www.naver.com/',
@@ -104,6 +116,27 @@ def get_article_infos(driver, crawl_date, press_list, title_list, link_list, nli
             break
 
         for article_info in article_infos :
+
+            news_cluster = article_info.select_one("div.news_cluster")
+            if news_cluster :
+                sub_txts = soup.select("div.news_cluster > a.sub_txt")
+                if not sub_txts :
+                    continue
+                else :
+                    for sub_txt in sub_txts :
+                        more_news_url_list.append(sub_txt)
+
+            
+            # 네이버 기사 링크 (없으면 아예 추가 X)
+            naver_article = article_info.select_one("div.info_group > a:nth-child(3)")
+            if not naver_article :
+                continue
+            else :
+                naver_article_link = naver_article["href"]
+
+            nlink_list.append(naver_article_link)
+
+
             # 언론사명
             press_info = article_info.select_one("div.info_group > a.info.press")
 
@@ -119,18 +152,8 @@ def get_article_infos(driver, crawl_date, press_list, title_list, link_list, nli
             title_list.append(title)
 
             # 기사 링크
-            link = article.get('href')
-            link_list.append(link)
-
-            # 네이버 기사 링크 (없으면 공란 처리)
-            naver_article = article_info.select_one("div.info_group > a:nth-child(3)")
-
-            if not naver_article :
-                naver_article_link = ""
-            else :
-                naver_article_link = naver_article["href"]
-
-            nlink_list.append(naver_article_link)
+            #link = article.get('href')
+            #link_list.append(link)
             
             # 날짜
             date_list.append(crawl_date)
@@ -142,13 +165,17 @@ def get_article_infos(driver, crawl_date, press_list, title_list, link_list, nli
             break
 
         time.sleep(1.0)
-        next_page_btn = driver.find_element_by_css_selector("a.btn_next").click()
+        next_page_btn = driver.find_element(By.CSS_SELECTOR, "a.btn_next").click()
 
     return press_list, title_list, link_list, nlink_list, more_news_url_list
 
 
 
-def get_news_infos(keyword, save_path, target_date, ds_de, sort=0, remove_duplicate=False) :
+def get_keywordNews(keyword, save_path, target_date, ds_de, sort=0, remove_duplicate=False) :
+    # 키워드 검색
+    #
+    #
+
     crawl_date = f"{target_date[:4]}.{target_date[4:6]}.{target_date[6:]}" # target_date 자르기 ex. 20220301 => 2022.03.01
     driver = set_chrome_driver()
 
@@ -192,12 +219,16 @@ def get_news_infos(keyword, save_path, target_date, ds_de, sort=0, remove_duplic
                       
             driver.close()
 
-    article_df = pd.DataFrame({"날짜": date_list, "언론사": press_list, "제목": title_list, "링크": link_list, "네이버 기사 링크":nlink_list, "본문":content_list, "키워드":keyword_list})
-    
+    article_df = pd.DataFrame({"date": date_list,
+                               "press": press_list,
+                               "title": title_list,
+                               "nlink":nlink_list,
+                               "content":content_list,
+                               "keywords":keyword_list})
                               
-    print(f"크롤링한 뉴스 기사 수 : {len(article_df)}")
+    print(f"추출한 뉴스 기사 수 : {len(article_df)}")
     if remove_duplicate:
-        article_df = article_df.drop_duplicates(['링크'], keep='first')
+        article_df = article_df.drop_duplicates(['nlink'], keep='first')
         print(f"after remove duplicate -> {len(article_df)}")
 
     article_df.to_excel(save_path, index=False)
@@ -215,7 +246,93 @@ def crawl_news_data(keyword, year, month, start_day, end_day, save_path):
         target_date = date_time_obj.strftime("%Y%m%d") #strftime 날짜/시간을 스트링으로 변환
         ds_de = date_time_obj.strftime("%Y.%m.%d")
 
-        get_news_infos(keyword=keyword, save_path=f"{save_path}/{keyword}/{target_date}_{keyword}_.xlsx", target_date=target_date, ds_de=ds_de, remove_duplicate=False)
+        get_keywordNews(keyword=keyword, save_path=f"{save_path}/{keyword}/{target_date}_{keyword}_.xlsx", target_date=target_date, ds_de=ds_de, remove_duplicate=False)
+
+
+
+
+
+
+
+def get_rankingNews(save_path, target_date, ranking_type, remove_duplicate=False) :
+    # 언론사별 랭킹뉴스 검색
+    #
+    #
+    crawl_date = f"{target_date[:4]}.{target_date[4:6]}.{target_date[6:]}"
+
+    press_list, title_list, nlink_list, content_list, keyword_list, date_list, ranking_list = [], [], [], [], [], [], []
+
+    press_list, ranking_list, title_list, nlink_list = get_ranking_news_infos(
+                                                                        crawl_date=crawl_date,
+                                                                        ranking_type=ranking_type,
+                                                                        date_list=date_list,
+                                                                        press_list=press_list,
+                                                                        ranking_list=ranking_list,
+                                                                        title_list=title_list,
+                                                                        nlink_list=nlink_list)
+    
+    content_list, keyword_list = get_article_contents(nlink_list)
+
+
+    article_df = pd.DataFrame({"date": date_list,
+                               "ranking": ranking_list,
+                               "press": press_list,
+                               "title": title_list,
+                               "nlink":nlink_list,
+                               "content":content_list,
+                               "keywords":keyword_list})
+    
+                              
+    print(f"extract article num : {len(article_df)}")
+    if remove_duplicate:
+        article_df = article_df.drop_duplicates(['nlink'], keep='first')
+        print(f"after remove duplicate -> {len(article_df)}")
+
+    article_df.to_excel(save_path, index=False)
+
+def get_rankingNews_infos(crawl_date, ranking_type, date_list, press_list, ranking_list, title_list, nlink_list) :
+    
+    headers = {
+        'referer' : 'https://www.naver.com/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
+        }
+
+    if ranking_type == "popular" :
+        url = 'https://news.naver.com/main/ranking/popularDay.naver?date=' + target_date
+
+    elif ranking_type == "comment" :
+        url = 'https://news.naver.com/main/ranking/popularMemo.naver?date=' + target_date
+
+
+    res = requests.get(url, headers=headers)
+    #res.raise_for_status()
+    soup = BeautifulSoup(res.text, 'lxml')
+    
+    rankingnews_boxes = soup.select('div.rankingnews_box_wrap._popularRanking > div > div')
+
+    for box in rankingnews_boxes :
+        rankingnews_lists = box.select('ul > li')
+        
+        # 언론사명
+        press = box.select_one('a > strong').text
+        
+        for li in rankingnews_lists :
+            # 기사 순
+            ranking = li.select_one('em.list_ranking_num').text
+            ranking_list.append(ranking)
+            
+            # 기사 제목
+            title = li.select_one('div.list_content > a').text
+            title_list.append(title)
+            
+            # 기사 링크
+            link = li.select_one('div.list_content > a')["href"]
+            nlink_list.append(link)
+
+            date_list.append(crawl_date)
+            press_list.append(press)
+                             
+    return press_list, ranking_list, title_list, nlink_list
 
 
 
@@ -225,7 +342,7 @@ class SentenceTokenizer(object) :
         #형태소 분석기
         self.kkma = Kkma()
         self.okt = Okt()
-        #불용어
+        #불용어 (추가 필요)
         self.stop_words_list = ["머니투데이", "이데일리" , "연합뉴스", "데일리", "동아일보", "중앙일보", "조선일보", "YTN", "News1", "기자", "특파원", "아", "어",
              "나", "우리", "저희", "따라", "의해", "을", "를", "에", "의", "가", "이", "있", "하", "것", "들", "그", "되", "수", "보", "않", "없", "사람", "주", "아니", "등", 
              "같", "때", "년", "한", "지", "대하", "오", "말", "일", "그렇", "위해", "때문", "그것", "두", "말하", "알", "그러나", "받", "못하", "일", "그런", "또", "문제", "더",
@@ -327,17 +444,43 @@ class TextRank(object) :
 
 if __name__ == "__main__" :
 
-    keyword = input("키워드 입력 : ")
-    print("뉴스 검색할 날짜 입력 (YYYYMMDD 형태로)")
-    start_date = input("검색 시작일 : ")
-    end_date = input("검색 종료일 : ")
-    year = start_date[:4]
-    month = start_date[4:6]
-    start_day = start_date[6:]
-    end_day = end_date[6:]
-    save_path = "./crawling_result"
+    print("1. 섹션별 속보 검색\n2. 키워드+날짜 검색\n3. 언론사별 랭킹뉴스\n")
+    option = input("option (번호 입력) : ")
 
-    os.makedirs(f"{save_path}/{keyword}")
+    if option == "2" :
+        keyword = input("검색 키워드 : ")
+        print("검색 날짜 (YYYYMMDD)")
+        start_date = input("검색 시작일 : ")
+        end_date = input("검색 종료일 : ")
+        
+        year = start_date[:4]
+        month = start_date[4:6]
+        start_day = start_date[6:]
+        end_day = end_date[6:]
 
-    print("크롤링 시작")
-    crawl_news_data(keyword=keyword, year=year, month=month, start_day=start_day, end_day=end_day, save_path=save_path)
+        save_path = "./crawling_result"
+        try : 
+            os.makedirs(f"{save_path}/{keyword}")
+        except :
+            pass
+
+        print("Crawling start...")
+        crawl_news_data(keyword=keyword, year=year, month=month, start_day=start_day, end_day=end_day, save_path=save_path)
+
+    elif option == "3" :
+        save_path = "./crawling_result"
+        try :
+            os.makedirs(f"{save_path}/언론사별 랭킹뉴스")
+        except :
+            pass
+
+        print("검색 날짜 (YYYYMMDD)")
+        target_date = input("검색일 : ")
+        ranking_type = input("랭킹 타입 선택 (1. 조회수순, 2. 댓글순) : ")
+        if '1' in ranking_type :
+            ranking_type = 'popular'
+        elif '2' in ranking_type :
+            ranking_type = 'comment'
+
+        print("Crawling start...")
+        get_rankingNews(save_path=f"{save_path}/언론사별 랭킹뉴스/{target_date}_언론사별 랭킹뉴스.xlsx", target_date=target_date, ranking_type=ranking_type, remove_duplicate=False)
