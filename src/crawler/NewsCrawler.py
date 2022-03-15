@@ -372,7 +372,6 @@ class SentenceTokenizer(object) :
         return nouns
 
 
-
 class GraphMatrix(object) :
 
     def __init__(self) :
