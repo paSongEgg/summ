@@ -58,11 +58,11 @@ def to_Json(save_path, ranking_type, data_list) :
     data_dict = {}
     for idx in range (0, len(data_list[0])) :
         if ranking_type == 'popular' :
-            data_dict[str(data_list[2][idx])] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'views' : data_list[3][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
+            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'ranking' : data_list[2][idx], 'views' : data_list[3][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
         elif ranking_type == 'comment' :
-            data_dict[str(data_list[2][idx])] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'comments' : data_list[3][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
+            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'ranking' : data_list[2][idx], 'comments' : data_list[3][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
         elif ranking_type == 'keyword' :
-            data_dict[str(data_list[7][idx])] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'reactions' : data_list[4][idx], 'title' : data_list[2][idx], 'link' : data_list[3][idx], 'content' : data_list[5][idx], 'keyword' : data_list[6][idx]}
+            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'reactions' : data_list[4][idx], 'title' : data_list[2][idx], 'link' : data_list[3][idx], 'content' : data_list[5][idx], 'keyword' : data_list[6][idx]}
         
     j = json.dumps(data_dict, ensure_ascii=False, indent="\t") 
     with open(f"{save_path}.json", 'w', encoding="utf-8") as f:
@@ -86,8 +86,8 @@ def get_rankingNews(save_path, target_date, ranking_type) :
     data_list.append(content_list)
     data_list.append(keyword_list)
 
-    to_Excel(save_path, ranking_type, data_list)
-    to_Json(save_path, ranking_type, data_list)
+    #to_Excel(save_path, ranking_type, data_list)
+    #to_Json(save_path, ranking_type, data_list)
 
 
 def get_rankingNews_infos(crawl_date, ranking_type) :
@@ -134,7 +134,6 @@ def get_rankingNews_infos(crawl_date, ranking_type) :
                         num_list.append(cnt)
                     except :
                         num_list.append('미제공')
-
                     
                 elif ranking_type == 'comment' :
                     try :
@@ -256,12 +255,11 @@ def get_keywordNews(keyword, save_path, target_date, ds_de, sort=0) :
             driver.close()
 
     ranking_list = [] # 빈 리스트
-    for i in range (0, len(date_list)) :
-        ranking_list.append(i+1)
     data_list = [date_list, press_list, title_list, link_list, num_list, content_list, keyword_list, ranking_list]
     ranking_type = 'keyword'
-    to_Excel(save_path, ranking_type, data_list)
-    to_Json(save_path, ranking_type, data_list)
+    
+    #to_Excel(save_path, ranking_type, data_list)
+    #to_Json(save_path, ranking_type, data_list)
 
 
 def get_keywordNews_infos(driver, crawl_date, date_list, press_list, title_list, link_list, more_news_base_url=None, more_news=False) :
