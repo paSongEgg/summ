@@ -14,8 +14,8 @@ function Navigation () {
 
             <MenuBox menu={menu}>
                 <br></br>
-                <Menu href="/">Main</Menu>
-                <Menu href="/slider">Slider</Menu>
+                <Menu href="/">오늘의 뉴스</Menu>
+                <Menu href="/sections">섹션별 뉴스</Menu>
                 <SearchBar></SearchBar>
             </MenuBox>
 
@@ -28,7 +28,7 @@ function Navigation () {
 
 const Common = styled.div`
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     margin: 20px;
     @media screen and (max-width: 550px) {
         flex-direction: column;
