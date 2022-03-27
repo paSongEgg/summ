@@ -103,6 +103,7 @@ def get_rankingNews(save_path, target_date, ranking_type) :
     crawl_date = f"{target_date[:4]}.{target_date[4:6]}.{target_date[6:]}"
     
     date_list, press_list, ranking_list, num_list, title_list, link_list, content_list, keyword_list = [], [], [], [], [], [], [], []
+    
     if ranking_type == 'section' :
         section = input("섹션 (1. 정치, 2. 경제, 3. 사회, 4. 생활, 5. 세계, 6. IT) : ")
 
@@ -138,7 +139,6 @@ def get_rankingNews_infos(crawl_date, ranking_type, section=None, is_section=Fal
         }
 
     date_list, press_list, ranking_list, num_list, title_list, link_list = [], [], [], [], [], []
-
 
     press_id = {'경향신문' : '032', '국민일보' : '005', '동아일보' : '020', '문화일보' : '021', '서울신문' : '081', '세계일보' : '022'}
     #press_id = {'경향신문' : '032', '국민일보' : '005', '동아일보' : '020', '문화일보' : '021', '서울신문' : '081', '세계일보' : '022',
@@ -345,7 +345,6 @@ def get_keywordNews(keyword, save_path, target_date, ds_de, sort=0) :
     #to_Excel(save_path, ranking_type, data_list)
     #to_Json(save_path, ranking_type, data_list)
     #clustering(save_path, data_list, ranking_type)
-
 
 def get_keywordNews_infos(driver, crawl_date, date_list, press_list, title_list, link_list, more_news_base_url=None, more_news=False) :
     
