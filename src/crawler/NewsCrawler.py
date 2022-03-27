@@ -26,6 +26,7 @@ def to_Excel(save_path, ranking_type, data_list) :
                                                    'press' : data_list[1],
                                                    'ranking' : data_list[2],
                                                    'views' : data_list[3],
+                                                   'section' : data_list[8],
                                                    'title' : data_list[4],
                                                    'link' : data_list[5],
                                                    'content' :data_list[6],
@@ -36,6 +37,7 @@ def to_Excel(save_path, ranking_type, data_list) :
                                                    "press" : data_list[1],
                                                    "ranking" : data_list[2],
                                                    "comments" : data_list[3],
+                                                   'section' : data_list[8],
                                                    "title" : data_list[4],
                                                    "link" : data_list[5],
                                                    "content" :data_list[6],
@@ -45,10 +47,11 @@ def to_Excel(save_path, ranking_type, data_list) :
         article_df = pd.DataFrame({"date" : data_list[0],
                                                    "press" : data_list[1],
                                                    "reactions" : data_list[4],
-                                                   "title" : data_list[2],
+                                                   "section" : data_list[8],
+                                                   "title" : data_list[2],                                                
                                                    "link" : data_list[3],
                                                    "content" :data_list[5],
-                                                   "keywords" : data_list[5]})
+                                                   "keywords" : data_list[6]})
 
     print(f"extract article num : {len(article_df)}")
     article_df.to_excel(f"{save_path}.xlsx", index=False)
@@ -58,11 +61,11 @@ def to_Json(save_path, ranking_type, data_list) :
     data_dict = {}
     for idx in range (0, len(data_list[0])) :
         if ranking_type == 'popular' :
-            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'ranking' : data_list[2][idx], 'views' : data_list[3][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
+            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'ranking' : data_list[2][idx], 'views' : data_list[3][idx], 'section' : data_list[8][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
         elif ranking_type == 'comment' :
-            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'ranking' : data_list[2][idx], 'comments' : data_list[3][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
+            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'ranking' : data_list[2][idx], 'comments' : data_list[3][idx], 'section' : data_list[8][idx], 'title' : data_list[4][idx], 'link' : data_list[5][idx], 'content' : data_list[6][idx], 'keyword' : data_list[7][idx]}
         elif ranking_type == 'keyword' :
-            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'reactions' : data_list[4][idx], 'title' : data_list[2][idx], 'link' : data_list[3][idx], 'content' : data_list[5][idx], 'keyword' : data_list[6][idx]}
+            data_dict[str(idx+1)] = {'date' : data_list[0][idx], 'press' : data_list[1][idx], 'reactions' : data_list[4][idx], 'section' : data_list[8][idx], 'title' : data_list[2][idx], 'link' : data_list[3][idx], 'content' : data_list[5][idx], 'keyword' : data_list[6][idx]}
         
     j = json.dumps(data_dict, ensure_ascii=False, indent="\t") 
     with open(f"{save_path}.json", 'w', encoding="utf-8") as f:
@@ -79,15 +82,17 @@ def get_rankingNews(save_path, target_date, ranking_type) :
     crawl_date = f"{target_date[:4]}.{target_date[4:6]}.{target_date[6:]}"
     
     date_list, press_list, ranking_list, num_list, title_list, link_list, content_list, keyword_list = [], [], [], [], [], [], [], []
+    section_list = []
     date_list, press_list, ranking_list, num_list, title_list, link_list = get_rankingNews_infos(crawl_date=crawl_date, ranking_type=ranking_type)
     data_list = [date_list, press_list, ranking_list, num_list, title_list, link_list]
 
-    content_list, keyword_list = get_article_contents(link_list)
+    content_list, keyword_list, section_list = get_article_contents(link_list)
     data_list.append(content_list)
     data_list.append(keyword_list)
+    data_list.append(section_list)
 
     #to_Excel(save_path, ranking_type, data_list)
-    #to_Json(save_path, ranking_type, data_list)
+    to_Json(save_path, ranking_type, data_list)
 
 
 def get_rankingNews_infos(crawl_date, ranking_type) :
@@ -159,11 +164,13 @@ def get_article_contents(link_list) :
         }
 
     content_list, keyword_list = [], []
+    section_list = []
 
     for article_link in link_list :
         if article_link == '' :
             content_list.append('')
             keyword_list.append('')
+            section_list.append('')
             continue
 
         res = requests.get(article_link, headers=headers)
@@ -171,15 +178,19 @@ def get_article_contents(link_list) :
 
         try : 
             content = soup.find('div',{'id' : 'articleBodyContents'}).text # 섹션탭에서 직접 선택하는 경우
+            section = soup.select_one('#articleBody > div.guide_categorization > a > em').text
         except :
             try : 
                 content = soup.find('div', {'id' : 'dic_area'}).text #랭킹뉴스 통하는 경우
+                section = soup.select_one('#contents > div.media_end_categorize > a > em').text
             except :
                 try :
                     content = soup.find('div', {'id' : 'newsEndContents'}).text # 스포츠
+                    section = soup.select_one('#wa_categorize_tooltip').text[:3]
                 except :
                     try :
                         content = soup.find('div',{'id' : 'articeBody'}).text # 연예
+                        section = soup.select_one('#content > div.end_ct > div > div.guide_categorization > a > em').text[:2]
                     except :
                         continue
         finally :
@@ -190,8 +201,10 @@ def get_article_contents(link_list) :
 
             textrank = TextRank(content)
             keyword_list.append(textrank.keywords())
+            
+            section_list.append(section)
                     
-    return content_list, keyword_list
+    return content_list, keyword_list, section_list
 
 
 ##############
@@ -225,6 +238,7 @@ def get_keywordNews(keyword, save_path, target_date, ds_de, sort=0) :
     driver.get(url)
 
     date_list, press_list, num_list, title_list, link_list, content_list, keyword_list, more_news_url_list = [], [], [], [], [], [], [], []
+    section_list = []
     date_list, press_list, title_list, link_list, more_news_url_list = get_keywordNews_infos(driver=driver,
                                                                                             crawl_date=crawl_date,
                                                                                             date_list=date_list,
@@ -234,7 +248,7 @@ def get_keywordNews(keyword, save_path, target_date, ds_de, sort=0) :
                                                                                             more_news_base_url=more_news_base_url,
                                                                                             more_news=True)
     
-    content_list, keyword_list, num_list = get_kN_article_content(driver, link_list)
+    content_list, keyword_list, num_list, section_list = get_kN_article_content(driver, link_list)
     driver.close()
 
     if len(more_news_url_list) > 0:
@@ -251,15 +265,15 @@ def get_keywordNews(keyword, save_path, target_date, ds_de, sort=0) :
                                                                                         link_list=link_list)
                                                                                         
 
-            content_list, keyword_list, num_list = get_kN_article_content(driver, link_list)       
+            content_list, keyword_list, num_list, section_list = get_kN_article_content(driver, link_list)       
             driver.close()
 
     ranking_list = [] # 빈 리스트
-    data_list = [date_list, press_list, title_list, link_list, num_list, content_list, keyword_list, ranking_list]
+    data_list = [date_list, press_list, title_list, link_list, num_list, content_list, keyword_list, ranking_list, section_list]
     ranking_type = 'keyword'
     
     #to_Excel(save_path, ranking_type, data_list)
-    #to_Json(save_path, ranking_type, data_list)
+    to_Json(save_path, ranking_type, data_list)
 
 
 def get_keywordNews_infos(driver, crawl_date, date_list, press_list, title_list, link_list, more_news_base_url=None, more_news=False) :
@@ -327,12 +341,14 @@ def get_kN_article_content(driver, link_list) :
         }
     
     content_list, keyword_list, num_list = [], [], []
+    section_list = []
 
     for article_link in link_list :
         if article_link == '' :
             content_list.append('')
             keyword_list.append('')
             num_list.appned('')
+            section_list.append('')
             continue
 
         res = requests.get(article_link, headers=headers)
@@ -341,15 +357,19 @@ def get_kN_article_content(driver, link_list) :
 
         try : 
             content = soup.find('div',{'id' : 'articleBodyContents'}).text
+            section = soup.select_one('#articleBody > div.guide_categorization > a > em').text
         except :
             try : 
                 content = soup.find('div', {'id' : 'dic_area'}).text
+                section = soup.select_one('#contents > div.media_end_categorize > a > em').text
             except :
                 try :
                     content = soup.find('div', {'id' : 'newsEndContents'}).text
+                    section = soup.select_one('#wa_categorize_tooltip').text[:3]
                 except :
                     try :
                         content = soup.find('div',{'id' : 'articeBody'}).text
+                        section = soup.select_one('#content > div.end_ct > div > div.guide_categorization > a > em').text[:2]
                     except :
                         continue
         finally :
@@ -360,6 +380,8 @@ def get_kN_article_content(driver, link_list) :
 
             textrank = TextRank(content)
             keyword_list.append(textrank.keywords())
+            
+            section_list.append(section)
 
         driver = set_chrome_driver()
         driver.get(article_link)
@@ -386,7 +408,7 @@ def get_kN_article_content(driver, link_list) :
             time.sleep(1)
             driver.close()
 
-    return content_list, keyword_list, num_list
+    return content_list, keyword_list, num_list, section_list
 
 
 if __name__ == "__main__" :
