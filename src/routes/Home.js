@@ -1,37 +1,46 @@
-import SearchBar from "components/SearchBar";
-import Themed from "components/Themed";
-import TodayNews from "components/TodayNews";
-import { useState } from "react";
+import {useState,useEffect} from "react";
+import SliderContent from 'components/SliderContent.js';
+import NewsList from "components/NewsList";
 import styles from "styles/Home.module.css"
+import Floating from "components/Floating";
 
-const Home=()=>{
-    const themes=["정치","경제","사회","생활/문화","IT/과학","세계"];
-    const [isThemeClicked,setIsThemeClicked]=useState(false);
-    const [clickedTheme,setClickedTheme]=useState("");
-
-    const onThemeClick=(e)=>{
-        setClickedTheme(e.target.id);
-        setIsThemeClicked(true);
-    }
-
-    const onAllClick=()=>{
-        setIsThemeClicked(false);
+const Home =()=>{
+    const [contents,setContents]=useState([]);
+    //아래는 테스트용 임시코드
+    const testData=[
+      {
+        src:"http://www.sookmyung.ac.kr/bbs/sookmyungkr/164/28205/artclView.do?layout=unknown",
+        img:"img/3.png",
+        title:"뉴스 제목 1",
+        tags:["해시태그1", "해시태그2", "해시태그3"]
+      },
+      {
+        src:"http://www.sookmyung.ac.kr/bbs/sookmyungkr/164/28686/artclView.do?layout=unknown",
+        img:"img/4.png",
+        title:"뉴스 제목 2",
+        tags:["해시태그1", "해시태그2", "해시태그3"]
+      },
+      {
+        src:"http://www.sookmyung.ac.kr/bbs/sookmyungkr/164/28688/artclView.do?layout=unknown",
+        img:"img/5.png",
+        title:"뉴스 제목 3",
+        tags:["해시태그1", "해시태그2", "해시태그3"]
+      }]
+    
+    useEffect=()=>{
+      //크롤러에서 contents 가져오기
+      setContents(testData);
     }
 
     return(
-        <section className={styles.home_container}>
-            <div className={styles.theme}>
-                <button onClick={onAllClick} className={styles.home_button_changeOption} id="통합">통합</button>       
-                {themes.map((theme)=>(
-                    <button onClick={onThemeClick} key={theme} id={theme} className={styles.button_theme}>{theme}</button>
-                ))}
+        <section>
+            <div className={styles.floating}>
+                <Floating/>
             </div>
-            {(isThemeClicked)?
-                <Themed theme={clickedTheme}/>:
-                <TodayNews/>
-            }
+            <div className={styles.news_list}>
+                <NewsList/>
+            </div>
         </section>
     )
 }
-
 export default Home;
