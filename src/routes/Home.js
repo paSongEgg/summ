@@ -2,27 +2,34 @@ import SearchBar from "components/SearchBar";
 import Themed from "components/Themed";
 import TodayNews from "components/TodayNews";
 import { useState } from "react";
-import styles from "../styles/Home.module.css"
+import styles from "styles/Home.module.css"
 
 const Home=()=>{
-    const [isToday,setIsToday]=useState(true);
-    const onOptionClick=()=>setIsToday((prev)=>!prev);
+    const themes=["정치","경제","사회","생활/문화","IT/과학","세계"];
+    const [isThemeClicked,setIsThemeClicked]=useState(false);
+    const [clickedTheme,setClickedTheme]=useState("");
+
+    const onThemeClick=(e)=>{
+        setClickedTheme(e.target.id);
+        setIsThemeClicked(true);
+    }
+
+    const onAllClick=()=>{
+        setIsThemeClicked(false);
+    }
+
     return(
         <section className={styles.home_container}>
-            <button className={styles.home_button_changeOption} onClick={onOptionClick}>통합</button>            
-            {isToday?(
+            <div className={styles.theme}>
+                <button onClick={onAllClick} className={styles.home_button_changeOption} id="통합">통합</button>       
+                {themes.map((theme)=>(
+                    <button onClick={onThemeClick} key={theme} id={theme} className={styles.button_theme}>{theme}</button>
+                ))}
+            </div>
+            {(isThemeClicked)?
+                <Themed theme={clickedTheme}/>:
                 <TodayNews/>
-            ):(
-                <div className={styles.theme}>
-                    <button className={styles.button_theme}>정치</button>
-                    <button className={styles.button_theme}>경제</button>
-                    <button className={styles.button_theme}>사회</button>
-                    <button className={styles.button_theme}>생활/문화</button>
-                    <button className={styles.button_theme}>IT/과학</button>
-                    <button className={styles.button_theme}>세계</button>
-                    <Themed/>
-                </div>
-            )}
+            }
         </section>
     )
 }
